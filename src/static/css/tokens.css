@@ -1,0 +1,116 @@
+/* ==========================================================================
+   SignSense Design Tokens — Clean Educational Theme
+   Inspired by warm ivory / deep forest green / teal accents
+   ========================================================================== */
+:root {
+  /* Core Surfaces */
+  --bg-primary: #F6F5F0;
+  --bg-secondary: #ffffff;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f0efea;
+  --bg-glass: rgba(255, 255, 255, 0.97);
+  --bg-sidebar: #1a3c2a;
+
+  /* Text */
+  --text-primary: #1e2a1e;
+  --text-secondary: #4a5e4a;
+  --text-muted: #7a8e7a;
+
+  /* Borders */
+  --border-subtle: #d4d0c8;
+  --border-focus: #285943;
+  --border-active: #3a7d5c;
+
+  /* Accent Colors — Forest / Teal / Terracotta */
+  --accent-primary: #285943;
+  --accent-primary-strong: #285943;
+  --accent-primary-hover: #1e4433;
+  --accent-secondary: #0d7377;
+  --accent-success: #2e7d56;
+  --accent-success-bg: rgba(46, 125, 86, 0.1);
+  --accent-warning: #c5842c;
+  --accent-warning-bg: rgba(197, 132, 44, 0.08);
+  --accent-danger: #B65E48;
+  --accent-danger-bg: rgba(182, 94, 72, 0.08);
+  --accent-uncertain: #8b6fc0;
+  --accent-uncertain-bg: rgba(139, 111, 192, 0.08);
+
+  /* Button text colors */
+  --button-success-text: #ffffff;
+  --button-danger-text: #ffffff;
+
+  /* Focus */
+  --focus-ring: #285943;
+
+  /* Typography */
+  --font-heading: 'Outfit', 'Segoe UI', system-ui, sans-serif;
+  --font-body: 'Inter', 'Segoe UI', system-ui, sans-serif;
+
+  /* Spacing */
+  --space-1: .25rem; --space-2: .5rem; --space-3: .75rem; --space-4: 1rem;
+  --space-5: 1.5rem; --space-6: 2rem; --space-7: 3rem; --space-8: 4rem;
+
+  /* Radii */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --radius-pill: 9999px;
+
+  /* Shadows — soft and warm */
+  --shadow-sm: 0 1px 3px rgba(30, 42, 30, 0.06);
+  --shadow-md: 0 4px 12px rgba(30, 42, 30, 0.08);
+  --shadow-lg: 0 8px 24px rgba(30, 42, 30, 0.1);
+  --shadow-glow: 0 0 0 3px rgba(40, 89, 67, 0.15);
+  --elevation-1: 0 1px 4px rgba(30, 42, 30, 0.06);
+  --elevation-2: 0 6px 16px rgba(30, 42, 30, 0.1);
+
+  /* Transitions */
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.2s ease;
+  --motion-fast: 140ms;
+  --motion-normal: 220ms;
+
+  /* Type scale */
+  --type-xs: .75rem; --type-sm: .875rem; --type-md: 1rem; --type-lg: 1.25rem;
+  --type-xl: 1.75rem; --type-2xl: clamp(2rem, 4vw, 2.75rem);
+}
+
+/* High Contrast Override */
+body.high-contrast {
+  --bg-primary: #ffffff;
+  --bg-secondary: #ffffff;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f5f5f5;
+  --bg-glass: #ffffff;
+  --text-primary: #000000;
+  --text-secondary: #1a1a1a;
+  --text-muted: #333333;
+  --border-subtle: #000000;
+  --accent-primary: #003d1f;
+  --accent-primary-strong: #003d1f;
+  --accent-secondary: #004e52;
+  --accent-success: #005c2e;
+  --accent-warning: #7a4b00;
+  --accent-danger: #8b2500;
+  --focus-ring: #000000;
+  --button-success-text: #ffffff;
+  --button-danger-text: #ffffff;
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  :root { --motion-fast: 0ms; --motion-normal: 0ms; }
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0ms !important;
+    transition-duration: 0ms !important;
+  }
+}
+body.reduced-motion *,
+body.reduced-motion *::before,
+body.reduced-motion *::after {
+  scroll-behavior: auto !important;
+  animation-duration: 0ms !important;
+  transition-duration: 0ms !important;
+}

@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Learn and explore an experimental Indian Sign Language vocabulary with reference images and optional webcam practice.">
+  <meta name="theme-color" content="#101a2a">
+  <title>SignSense — Adaptive Indian Sign Language Learning System</title>
+  
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="stylesheet" href="/static/css/tokens.css">
+  <link rel="stylesheet" href="/static/css/components.css">
+</head>
+<body>
+  <!-- WCAG navigation shortcut: let keyboard users bypass repeated navigation. -->
+  <a class="skip-link" href="#mainContent">Skip to content</a>
+  <div id="appStatus" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- Dev Diagnostics HUD (Performance Targets Monitoring) -->
+  <aside id="diagnosticsHud" class="diagnostics-hud" aria-label="Developer diagnostics" aria-live="polite" hidden>
+    <div class="hud-grid">
+      <div class="hud-stat">Camera: <span id="hudCameraFps">--</span> FPS</div>
+      <div class="hud-stat">Inference: <span id="hudInferenceFreq">--</span> Hz</div>
+      <div class="hud-stat">Model Latency: <span id="hudInferenceMs">--</span> ms</div>
+      <div class="hud-stat">Feedback Latency: <span id="hudFeedbackMs">--</span> ms</div>
+      <div class="hud-stat">Rec Latency: <span id="hudRecMs">--</span> ms</div>
+      <div class="hud-stat">Dropped: <span id="hudDroppedFrames">0</span></div>
+    </div>
+  </aside>
+
+  <!-- Application Header -->
+  <header class="app-header" role="banner">
+    <div class="header-container">
+      <button class="brand-wrapper" id="brandHomeBtn" type="button" aria-label="SignSense home">
+        <div class="brand-icon" aria-hidden="true">🤟</div>
+        <div>
+          <span class="brand-title">SignSense</span>
+          <span class="brand-badge">ISL Adaptive</span>
+        </div>
+      </button>
+
+      <nav class="nav-links" aria-label="Main navigation">
+        <button id="navDashboard" class="nav-btn active" data-screen="screenDashboard" aria-current="page">Home</button>
+        <button id="navCurriculum" class="nav-btn" data-screen="screenCurriculum">Learn</button>
+        <button id="navPractice" class="nav-btn" data-screen="screenPractice">Practice</button>
+        <button id="navHistory" class="nav-btn" data-screen="screenHistory">Progress</button>
+        <button id="navSettings" class="nav-btn" data-screen="screenSettings">Settings</button>
+      </nav>
+
+      <div class="header-actions">
+        <details class="accessibility-menu" id="accessibilityMenu">
+          <summary class="icon-button" aria-label="Accessibility settings" title="Accessibility settings">◐</summary>
+          <div class="accessibility-popover">
+            <label for="themeSelect">Color theme<select id="themeSelect"><option value="system">Use device setting</option><option value="dark">Dark</option><option value="light">Light</option></select></label>
+            <label class="toggle-control"><input type="checkbox" id="headerContrast"> High contrast</label>
+            <a href="#aboutBeta" class="btn-ghost" id="accessibilitySettingsLink">More accessibility settings</a>
+          </div>
+        </details>
+        <a href="#aboutBeta" class="beta-link" id="headerBetaLink" aria-label="About and beta status">Beta</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Application Body -->
+  <main class="app-main" id="mainContent" role="main">
+
+    <!-- ====================================================================
+         Screen A: Onboarding View
+         ==================================================================== -->
+    <section id="screenOnboarding" class="screen-view" aria-labelledby="onboardingTitle">
+      <div class="onboarding-hero">
+        <div class="onboarding-progress"><span id="onboardingProgressText" aria-live="polite">Step 1 of 4</span><div class="onboarding-dots" aria-hidden="true"><i class="active"></i><i></i><i></i><i></i></div></div>
+        <div class="step-card onboarding-panel" data-onboarding-step="0">
+          <div class="onboarding-illustration" aria-hidden="true">👋</div>
+          <h1 id="onboardingTitle">Welcome to SignSense</h1>
+          <p class="hero-subtitle">Learn ISL at your pace.<br>Made for Deaf, hard of hearing or non-speaking learners, and everyone learning ISL.</p>
+          <div class="beta-notice" role="note"><span aria-hidden="true">ℹ️</span><span id="betaNoticeText"></span></div>
+        </div>
+        <div class="step-card onboarding-panel" data-onboarding-step="1" hidden>
+          <div class="onboarding-illustration" aria-hidden="true">🧭</div><h2>Set your learning preferences</h2>
+          <div class="form-group"><label for="onboardingGoal">Learning goal</label><select id="onboardingGoal" class="form-select"><option value="basics">Basic numerals (1–5)</option><option value="numerals">All numerals (1–9)</option><option value="alphabet">Letters (A–Z)</option><option value="comprehensive">All 35 signs</option></select></div>
+          <div class="form-group"><label for="onboardingSkill">Experience level</label><select id="onboardingSkill" class="form-select"><option value="beginner">New to ISL</option><option value="intermediate">Some ISL experience</option></select></div>
+          <div class="form-group"><label for="onboardingHand">Dominant hand</label><select id="onboardingHand" class="form-select"><option value="right">Right</option><option value="left">Left</option><option value="both">I use both</option></select></div>
+          <div class="form-group"><label for="onboardingTextSize">Text size</label><select id="onboardingTextSize" class="form-select"><option value="regular">Regular</option><option value="large">Large</option><option value="larger">Extra large</option></select></div>
+        </div>
+        <div class="step-card onboarding-panel" data-onboarding-step="2" hidden>
+          <div class="onboarding-illustration" aria-hidden="true">📷</div><h2>Set up your camera</h2>
+          <p class="card-subtitle">Allow camera access to check light, distance and hand position. Camera frames go to the local app on this device. They are not saved.</p>
+          <div class="setup-checks" aria-live="polite">
+            <div class="setup-check" id="setupLighting"><span aria-hidden="true">◐</span><strong>Lighting</strong><span class="setup-result">Not checked</span></div>
+            <div class="setup-check" id="setupDistance"><span aria-hidden="true">↔</span><strong>Distance</strong><span class="setup-result">Not checked</span></div>
+            <div class="setup-check" id="setupPosition"><span aria-hidden="true">⌖</span><strong>Position</strong><span class="setup-result">Not checked</span></div>
+          </div>
+          <div class="onboarding-camera-preview"><video id="setupVideo" autoplay playsinline></video><p id="setupCameraMessage" role="status">Camera preview appears here after you allow access.</p></div>
+          <button id="btnSetupCamera" class="btn-secondary" type="button">Enable camera and check setup</button>
+        </div>
+        <div class="step-card onboarding-panel" data-onboarding-step="3" hidden>
+          <div class="onboarding-illustration" aria-hidden="true">🔒</div><h2>Privacy and progress</h2>
+          <p><strong>Your camera video stays on this device.</strong></p><p>Hand-position details go to the local app. Video is not saved in practice history.</p>
+          <label class="toggle-control"><input type="checkbox" id="saveProgressChoice" checked> Save my learning progress on this device</label>
+          <div class="privacy-notice-box">Your choices and practice history stay in the local SignSense database.</div>
+        </div>
+        <div class="onboarding-actions">
+          <button id="btnOnboardingBack" class="btn-secondary" type="button" hidden>Back</button>
+          <button id="btnOnboardingSkip" class="btn-ghost" type="button">Skip setup</button>
+          <button id="btnOnboardingNext" class="btn-primary" type="button">Continue</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         Screen B: Dashboard View
+         ==================================================================== -->
+    <section id="screenDashboard" class="screen-view active">
+      <!-- Quick Stats Row -->
+      <div class="dashboard-heading">
+        <div>
+          <p class="eyebrow">YOUR LEARNING SPACE</p>
+          <h1 id="dashboardGreeting">Welcome to your learning path</h1>
+          <p class="card-subtitle">Explore the included sign references, then practise when you’re ready.</p>
+        </div>
+      </div>
+      <div class="stats-row" aria-label="Learning activity summary">
+        <div class="stat-box">
+          <div class="stat-val" id="dashTotalAttempts">0</div>
+          <div class="stat-label">Day streak</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-val" id="dashLearningCount">0 of 35</div>
+          <div class="stat-label">Signs mastered</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-val" id="dashAssessedCorrect">0 of 10</div><progress id="dashWeeklyRing" max="10" value="0" aria-label="Daily practice goal"></progress>
+          <div class="stat-label">Today's practice</div>
+        </div>
+        <div class="stat-box"><div class="stat-val" id="dashStageProgress">Stage 1</div><div class="stat-label">Current stage</div></div>
+      </div>
+
+      <div class="dashboard-grid">
+        <!-- Left Column: Primary Recommendation Hero & Lessons -->
+        <div>
+          <section class="recommendation-hero-card" id="dashRecCard" aria-labelledby="nextStepsHeading">
+            <h2 id="nextStepsHeading" class="next-steps-heading">Your next steps</h2>
+            <span class="rec-badge" id="dashRecBadge">Your next step</span>
+            <h2 id="dashRecTitle" style="font-size: 1.6rem;">Loading suggestions…</h2>
+            <p class="rec-explanation" id="dashRecExplanation">Suggestions are based on your saved practice history.</p>
+            <details class="why-this"><summary>Why this?</summary><p id="dashRecWhy">Based on your saved practice.</p></details>
+            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+              <button id="btnDashStartRec" class="btn-primary" type="button" disabled>Practise</button>
+              <button id="btnDashDismissRec" class="btn-secondary" type="button" disabled>Dismiss</button>
+              <button id="btnDashNotNow" class="btn-ghost" type="button" disabled>Not now</button>
+            </div>
+          </section>
+          <div id="fullRecommendationsList" class="next-steps-list" aria-live="polite" aria-label="More suggested activities"></div>
+
+          <!-- Recently Practiced Signs -->
+          <div class="card" style="margin-bottom: 1.5rem;">
+            <h3 class="card-title">🕒 Recently Practised Signs</h3>
+            <p class="card-subtitle">Quickly jump back into signs you've worked on recently.</p>
+            <div id="dashRecentChips" class="sign-chip-list">
+              <span style="color: var(--text-muted); font-size: 0.85rem;">No recent practice recorded yet. Start your first lesson!</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column: Revision Queue & Quick Actions -->
+        <div>
+          <!-- Revision Due Card -->
+          <div class="card" style="margin-bottom: 1.5rem;">
+            <h3 class="card-title">📅 Spaced Revision Queue</h3>
+            <p class="card-subtitle">Signs ready for another look.</p>
+            <div id="dashRevisionChips" class="sign-chip-list">
+              <span style="color: var(--text-muted); font-size: 0.85rem;">Nothing due. Learn something new.</span>
+            </div>
+          </div>
+
+          <!-- Quick Navigation Actions -->
+          <div class="card">
+            <h3 class="card-title">⚡ Quick Actions</h3>
+            <div style="display: flex; flex-direction: column; gap: 0.65rem; margin-top: 0.75rem;">
+              <button id="btnQuickBrowseAll" class="btn-secondary" style="justify-content: flex-start;">
+                📚 Browse All 35 Signs
+              </button>
+              <button id="btnQuickPracticeRandom" class="btn-secondary" style="justify-content: flex-start;">
+                🎯 Choose a sign to practise
+              </button>
+              <button id="btnQuickViewHistory" class="btn-secondary" style="justify-content: flex-start;">
+                📈 View Detailed Progress
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         Screen C: Curriculum & Reference View
+         ==================================================================== -->
+    <section id="screenCurriculum" class="screen-view">
+      <div class="page-heading">
+        <div>
+          <h1>Sign library</h1>
+          <p class="card-subtitle">Browse 35 sign references and choose one to practise.</p>
+        </div>
+        <div class="curriculum-tools">
+          <label class="sr-only" for="curriculumSearch">Search signs</label>
+          <input id="curriculumSearch" type="search" placeholder="Search 1–9 or A–Z" autocomplete="off">
+          <label class="sr-only" for="curriculumFilter">Filter signs</label>
+          <select id="curriculumFilter">
+            <option value="all">All signs</option><option value="numerals">Numbers</option><option value="alphabet">Letters</option>
+          </select>
+          <label class="sr-only" for="curriculumStatusFilter">Filter by practice status</label>
+          <select id="curriculumStatusFilter">
+            <option value="all">Any mastery level</option><option value="new">New</option><option value="learning">Learning</option><option value="familiar">Familiar</option><option value="mastered">Mastered</option>
+          </select>
+        </div>
+      </div>
+      <div class="curriculum-jump" aria-label="Jump to a sign group"><strong>Jump:</strong><div id="curriculumJumpChips"></div></div>
+      <div class="curriculum-jump" aria-label="Filter by mastery"><strong>Show:</strong><div id="curriculumMasteryChips"></div></div>
+
+      <div id="curriculumStagesContainer">
+        <!-- Stages and sign cards rendered dynamically by app.js -->
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         Screen D & E: Real-Time Practice & Feedback View
+         ==================================================================== -->
+    <section id="screenPractice" class="screen-view">
+      <h1 class="practice-page-title">Practise a sign</h1>
+      <div class="practice-layout">
+        
+        <!-- Left: Live Camera View with ROI Overlay -->
+        <div>
+          <div class="camera-preview-wrapper" id="cameraContainer">
+            <video id="cameraVideo" autoplay playsinline></video>
+            <canvas id="cameraOverlay"></canvas>
+            
+            <div class="camera-placeholder" id="cameraPlaceholder">
+              <div style="font-size: 3rem; margin-bottom: 0.75rem;">📷</div>
+              <h3>Camera off</h3>
+              <p style="font-size: 0.95rem; color: var(--text-secondary); margin: 0.5rem 0 1rem;">Your camera stays in this browser. Start when you are ready.</p>
+              <button id="btnStartCamera" class="btn-primary">Start camera</button>
+            </div>
+
+            <div id="practiceBanner" class="practice-banner state-positioning" role="status" aria-live="polite" aria-atomic="true">
+              <span id="practiceStateIcon" aria-hidden="true">👋</span><span id="practiceStateText">Start the camera when you are ready.</span>
+              <span class="progress-ring" id="attemptProgressRing" aria-hidden="true"><span id="attemptProgressValue"></span></span>
+            </div>
+
+            <div class="camera-status-pill" role="status" aria-live="polite">
+              <span class="status-dot" id="cameraStatusDot"></span>
+              <span id="cameraStatusText">Camera Inactive</span>
+            </div>
+          </div>
+
+          <!-- Camera Controls Bar -->
+          <div class="camera-controls">
+            <div class="camera-toolbar">
+              <button id="btnToggleCamera" class="btn-secondary" type="button" disabled>Pause camera</button>
+              <label for="cameraDeviceSelect" class="sr-only">Camera</label><select id="cameraDeviceSelect" aria-describedby="cameraHelp"><option value="">Default camera</option></select>
+              <label class="overlay-pref"><input type="checkbox" id="overlayEnabled" checked> Show hand guide</label>
+              <button id="btnCheckSetup" class="btn-secondary" type="button">Check my setup</button>
+            </div>
+            <p id="cameraHelp" class="helper-text">The local app checks camera frames on this device. Frames are not saved.</p>
+          </div>
+        </div>
+
+        <!-- Right: Target Sign, Stability Meter & Constructive Feedback -->
+        <div class="practice-sidebar">
+          
+          <!-- Target Sign Card -->
+          <div class="target-sign-header">
+            <div>
+              <div class="eyebrow">CURRENT REFERENCE</div>
+              <div class="target-badge" id="targetSignLabel">Sign 1</div>
+              <div style="font-size: 0.8rem; color: var(--text-secondary);" id="targetSignStage">Stage 1</div>
+              <span class="chip" id="handCountBadge">1 hand</span>
+            </div>
+            <img id="targetSignThumb" class="target-thumb-mini" src="/static/references/1.jpg" alt="Target Sign Reference Demonstration">
+          </div>
+
+          <!-- Instructions Card -->
+          <div class="card practice-reference-note" style="padding: 1rem;">
+            <h4 style="font-size: 0.9rem; margin-bottom: 0.35rem;">Steps to try</h4>
+            <p id="targetSignInstructions" style="font-size: 0.95rem; color: var(--text-secondary); line-height: 1.5;">Study the example and follow the steps.</p>
+            <ol id="poseBreakdown" class="pose-breakdown"></ol>
+          </div>
+          <div class="practice-tools-row">
+            <button id="btnPracticeHelp" class="icon-button" type="button" aria-label="Open practice tips">?</button>
+          </div>
+
+          <div class="mode-toolbar" role="group" aria-label="Practice mode">
+            <button type="button" class="mode-button active" data-mode="learn" aria-pressed="true">Learn</button>
+            <button type="button" class="mode-button" data-mode="practise" aria-pressed="false">Practise</button>
+            <button type="button" class="mode-button" data-mode="check" aria-pressed="false">Check</button>
+          </div>
+          <p id="modeDescription" class="helper-text" aria-live="polite">Watch the steps and try the sign. No score is saved.</p>
+
+          <div id="attemptResult" class="attempt-result" hidden aria-live="polite" aria-atomic="true">
+              <div class="attempt-result-heading"><span id="attemptResultIcon" aria-hidden="true">✓</span><h3 id="attemptResultTitle">Got it</h3></div>
+              <p id="attemptResultHint"></p>
+              <p id="failureSource" class="helper-text"></p>
+              <p id="practiceSessionSummary" class="session-summary" aria-live="polite"></p>
+              <label class="toggle-control"><input type="checkbox" id="pauseAutoAdvance"> Pause auto-advance <span id="autoAdvanceLabel"></span></label>
+              <div class="result-actions">
+                <button id="btnRetryPractice" class="btn-secondary" type="button">Try again</button>
+                <button id="btnReviewReference" class="btn-secondary" type="button">Watch steps</button>
+                <button id="btnNextSign" class="btn-primary" type="button">Next sign</button>
+              </div>
+              <button id="btnSingleNext" class="single-next" type="button" hidden>Next</button>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         Screen F: Personalized Recommendations View
+         ==================================================================== -->
+    <!-- Recommendation cards are part of Home. Legacy screenRecommendations requests redirect to Home. -->
+
+    <!-- ====================================================================
+         Screen G: Progress & History View
+         ==================================================================== -->
+    <section id="screenHistory" class="screen-view">
+      <header class="page-heading"><h1>Your progress</h1><p class="card-subtitle">See your practice days, signs and hints.</p></header>
+      <section class="card progress-week-card" aria-labelledby="weekHeading"><h3 id="weekHeading">This week</h3><div id="historyWeekStrip" class="history-week-strip" aria-live="polite"></div></section>
+      <section class="card" aria-labelledby="trendHeading"><h3 id="trendHeading">Sign trends</h3><p class="card-subtitle">Higher points mean Got it. Middle means Almost. Lower means Try again.</p><div id="historyTrends" class="history-trends"></div></section>
+      <section class="history-section" aria-labelledby="timelineHeading">
+        <h3 id="timelineHeading">Practice timeline</h3>
+        <div class="history-filters">
+          <label>Sign <select id="historySignFilter"><option value="all">All signs</option></select></label>
+          <label>Outcome <select id="historyOutcomeFilter"><option value="all">All outcomes</option><option value="got_it">Got it</option><option value="almost">Almost</option><option value="try_again">Try again</option><option value="not_seen">Could not see hand</option><option value="legacy">Older attempt</option></select></label>
+          <label>From <input id="historyDateFrom" type="date"></label><label>To <input id="historyDateTo" type="date"></label>
+        </div>
+        <div id="historyTimeline" class="history-timeline" aria-live="polite"></div>
+      </section>
+    </section>
+
+    <!-- ====================================================================
+         Screen H: Settings & Privacy View
+         ==================================================================== -->
+    <section id="screenSettings" class="screen-view">
+      <div style="max-width: 800px; margin: 0 auto;">
+        <h1 style="margin-bottom: 0.5rem;">Settings</h1>
+        <p class="card-subtitle" style="margin-bottom: 2rem;">Choose what works best for you.</p>
+
+        <div class="card" style="margin-bottom: 1.5rem;">
+          <h3 class="card-title">Learning preferences</h3>
+          <div class="form-group">
+            <label for="settingsGoal">Learning goal</label>
+            <select id="settingsGoal" class="form-select">
+              <option value="basics">Stage 1: Basic Numerals (1–5)</option>
+              <option value="numerals">All Numerals (1–9)</option>
+              <option value="alphabet">Fingerspelling Alphabet (A–Z)</option>
+              <option value="comprehensive">Comprehensive Curriculum (35 Signs)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="settingsSkill">Experience level</label>
+            <select id="settingsSkill" class="form-select">
+              <option value="beginner">Beginner</option>
+              <option value="intermediate">Intermediate</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="settingsDominantHand">Dominant hand</label>
+            <select id="settingsDominantHand"><option value="right">Right</option><option value="left">Left</option><option value="both">I use both</option></select>
+          </div>
+          <div class="form-group"><label for="settingsDailyGoal">Daily practice goal</label><select id="settingsDailyGoal"><option value="5">5 attempts</option><option value="10">10 attempts</option><option value="15">15 attempts</option><option value="20">20 attempts</option><option value="30">30 attempts</option></select></div>
+        </div>
+
+        <div class="card" style="margin-bottom: 1.5rem;">
+          <h3 class="card-title">Accessibility</h3>
+          <div class="form-group"><label for="settingsThemeSelect">Color theme</label><select id="settingsThemeSelect"><option value="system">Use device setting</option><option value="dark">Dark</option><option value="light">Light</option></select></div>
+          <div class="form-group"><label class="toggle-control"><input type="checkbox" id="settingsHighContrast"> High contrast</label></div>
+          <div class="form-group"><label class="toggle-control"><input type="checkbox" id="settingsReducedMotion"> Reduce motion</label></div>
+          <div class="form-group"><label for="settingsFontSize">Text size</label><select id="settingsFontSize"><option value="regular">Regular</option><option value="large">Large</option><option value="larger">Extra large</option></select></div>
+          <div class="form-group"><label class="toggle-control"><input type="checkbox" id="settingsColorBlind"> Colour-blind-safe colours</label></div>
+          <div class="form-group"><label class="toggle-control"><input type="checkbox" id="settingsLargerTargets"> Larger buttons and controls</label></div>
+          <div class="form-group"><label class="toggle-control"><input type="checkbox" id="settingsCaptionCues" checked> Show caption-style on-screen cues</label></div>
+          <div class="form-group"><label class="toggle-control"><input type="checkbox" id="settingsMirrorView" checked> Mirror camera view</label></div>
+          <div class="form-group">
+            <label for="settingsCameraSelect">Preferred camera</label>
+            <select id="settingsCameraSelect"><option value="">Default camera</option></select>
+            <p class="helper-text">Camera names appear after you grant browser permission.</p>
+          </div>
+          <div class="form-group">
+            <label><input type="checkbox" id="settingsOverlay" checked> Show hand-position guide and tracking overlay</label>
+          </div>
+        </div>
+
+        <section class="card settings-privacy" aria-labelledby="privacyTitle"><h3 id="privacyTitle" class="card-title">Privacy</h3><ul><li>Video stays on this device.</li><li>Progress is saved on this computer when saving is on.</li></ul>
+          <div class="form-group"><label class="toggle-control"><input type="checkbox" id="settingsSaveProgress" checked> Save my learning progress on this device</label></div>
+          <div class="settings-actions"><button id="btnExportData" class="btn-secondary" type="button">Export my data</button><button id="btnDeleteData" class="btn-danger" type="button">Delete my data</button></div>
+        </section>
+
+        <section id="aboutBeta" class="card about-beta" style="margin-bottom: 1.5rem;" aria-labelledby="aboutBetaTitle">
+          <h3 class="card-title" id="aboutBetaTitle" tabindex="-1">About and beta status</h3>
+          <p id="aboutBetaNotice"></p>
+          <p>SignSense stores progress locally. Camera frames go to this app on your computer for hand tracking. Frames are processed in memory and not saved.</p>
+          <p id="templateReviewStatus">The 35 pose templates are experimental and need review by an ISL educator. They do not verify learning progress.</p>
+          <p><strong>How the sign check works:</strong> It looks at hand shapes and positions, then compares them with examples. It can make mistakes. Use the reference too. Feedback is not a verified grade.</p>
+          <p><strong>Credits:</strong> SignSense is adapted from the Indian Sign Language Recognition project by Karthikeyan et al.</p>
+          <label class="toggle-control"><input type="checkbox" id="settingsDemoMode"> Turn on demo mode</label>
+        </section>
+
+        <!-- Data Retention & History Reset -->
+        <div class="card" style="border-color: rgba(239, 68, 68, 0.3);">
+          <h3 class="card-title" style="color: #fca5a5;">⚠️ Danger Zone: Reset Learning History</h3>
+          <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 0.5rem 0 1rem;">
+            Permanently clear all stored practice attempts, per-sign mastery scores, and reset recommendation state.
+          </p>
+          <button id="btnResetHistory" class="btn-danger">Reset All Progress</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+    <section id="recoveryPanel" class="recovery-panel" role="alert" aria-live="assertive" hidden>
+      <div><span id="recoveryIcon" aria-hidden="true">ℹ️</span><div><h2 id="recoveryTitle">Camera help</h2><p id="recoveryMessage"></p></div></div>
+      <div class="recovery-actions"><button id="recoveryRetry" class="btn-primary" type="button">Try again</button><button id="recoverySkip" class="btn-secondary" type="button">Skip for now</button></div>
+    </section>
+
+    <aside id="developerTools" class="developer-tools" hidden aria-label="Developer demo controls">
+      <h2>Developer demo controls</h2><label for="demoErrorSelect">Show a recovery state</label>
+      <select id="demoErrorSelect"><option value="">Choose a demo state</option><option value="camera_blocked">Camera blocked</option><option value="camera_missing">Camera not found</option><option value="camera_busy">Camera in use</option><option value="low_light">Low light</option><option value="hand_small">Hand too small or too close</option><option value="no_hand">No hand for 15 seconds</option><option value="two_hands">Second hand not seen</option><option value="unsupported">Browser unsupported</option><option value="model_failed">Recognition model unavailable</option></select>
+      <label for="demoOutcomeSelect">Force next attempt outcome</label><select id="demoOutcomeSelect"><option value="">Use live attempt result</option><option value="got_it">Got it</option><option value="almost">Almost</option><option value="try_again">Try again</option><option value="not_seen">Not seen</option></select>
+      <label for="demoHintInput">Demo hint for Almost</label><input id="demoHintInput" type="text" placeholder="Tuck your thumb in">
+      <button id="btnDemoMode" class="btn-secondary" type="button" aria-pressed="false">Demo mode off</button>
+      <div class="demo-data-controls"><p>Demo history is fictional and separate from learner progress.</p><button id="btnSeedDemoData" class="btn-secondary" type="button">Load demo history</button><button id="btnResetDemoData" class="btn-secondary" type="button">Reset demo data</button></div>
+      <div class="demo-data-controls"><p>Demo history is fictional and separate from learner progress.</p><button id="btnSeedDemoData" class="btn-secondary" type="button">Load demo history</button><button id="btnResetDemoData" class="btn-secondary" type="button">Reset demo data</button></div>
+    </aside>
+    <span id="demoModeChip" class="demo-mode-chip" hidden>Demo mode</span>
+
+    <dialog id="helpDrawer" class="help-drawer" aria-labelledby="helpTitle">
+      <div class="help-heading"><h2 id="helpTitle">Practice tips</h2><button id="helpClose" class="btn-secondary" type="button">Close</button></div>
+      <ol class="help-tips">
+        <li><span aria-hidden="true">💡</span><div><strong>Use even light</strong><p>Face a window or lamp. Keep bright light behind the camera.</p></div></li>
+        <li><span aria-hidden="true">📏</span><div><strong>Find a comfortable distance</strong><p>Keep your hands large enough to see, with room to move.</p></div></li>
+        <li><span aria-hidden="true">🙌</span><div><strong>Keep each hand in view</strong><p>Use the guide to check that your hands fit inside the picture.</p></div></li>
+        <li><span aria-hidden="true">🖼️</span><div><strong>Look at the example</strong><p>Compare the hand shape and direction before you begin.</p></div></li>
+        <li><span aria-hidden="true">🔁</span><div><strong>Take your time</strong><p>You can retry, review the example or skip camera practice.</p></div></li>
+      </ol>
+    </dialog>
+
+    <!-- Detailed Sign Reference Modal -->
+  <dialog id="modalReferenceDetail" aria-labelledby="modalSignTitle">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+      <h2 id="modalSignTitle">Sign Reference</h2>
+      <button id="modalCloseBtn" class="btn-secondary" type="button" aria-label="Close sign reference">Close</button>
+    </div>
+    
+    <div class="reference-detail-container">
+      <img id="modalSignImage" class="reference-image-large" src="" alt="Demonstration Image">
+      <div>
+        <div style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted);" id="modalSignStage">Stage</div>
+        <div style="font-size: 1.1rem; font-weight: 600; margin: 0.25rem 0 0.75rem;" id="modalSignCategory">Category</div>
+        <div class="instruction-box" id="modalSignInstruction">Instructions...</div>
+        <p id="modalSignHands" class="card-subtitle"></p>
+        <div><strong>Steps</strong><ol id="modalSignSteps"></ol></div>
+        <p id="modalSignConfusions" class="card-subtitle"></p>
+        <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 1.25rem;" id="modalSignProvenance">See About and beta status in Settings.</div>
+        <button id="modalStartPracticeBtn" class="btn-primary" style="width: 100%; justify-content: center;">
+          Practise This Sign Now
+        </button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Application Footer -->
+  <footer class="app-footer" role="contentinfo">
+    <p>SignSense: Adaptive Indian Sign Language Learning System &copy; 2026. Built under MIT License.</p>
+    <p style="margin-top: 0.25rem;">Transformed from original repository by Karthikeyan et al.</p>
+  </footer>
+
+  <!-- Frontend Logic -->
+  <script src="/static/js/copy.js"></script>
+  <script src="/static/js/features.js"></script>
+  <script src="/static/js/scorer.js"></script>
+  <script src="/static/js/hand-tracker.js"></script>
+  <script src="/static/js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+# SignSense runtime dependencies.
+# Vision stack pinned for CPython 3.12 x64: MediaPipe 0.10.32 and OpenCV
+# contrib 4.11.0.86 both publish compatible Windows wheels. Keep exactly one
+# OpenCV distribution installed; all variants write to the same cv2 namespace.
+
+flask>=3.0.0
+numpy>=2.0.0
+opencv-contrib-python>=4.11.0.86
+scikit-learn>=1.5.2
+scipy>=1.15.3
+pillow>=12.0.0
+imutils>=0.5.4
+pytest>=8.3.5
+mediapipe>=0.10.32
